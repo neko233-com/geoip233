@@ -1,5 +1,5 @@
-use std::fmt;
 use maxminddb::geoip2;
+use std::fmt;
 
 /// GeoIP lookup result for a city-level database.
 #[derive(Debug, Clone, Default)]
@@ -52,7 +52,10 @@ impl GeoIpCity {
             region_name: subdivisions
                 .and_then(|s| s.names.as_ref())
                 .and_then(|n| n.get("en").map(|s| s.to_string())),
-            postal_code: city.postal.as_ref().and_then(|p| p.code.map(|s| s.to_owned())),
+            postal_code: city
+                .postal
+                .as_ref()
+                .and_then(|p| p.code.map(|s| s.to_owned())),
             latitude: location.and_then(|l| l.latitude),
             longitude: location.and_then(|l| l.longitude),
             timezone: location.and_then(|l| l.time_zone.map(|s| s.to_owned())),
