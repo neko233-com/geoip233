@@ -3,19 +3,20 @@ name = "geoip233"
 version = "0.1.0"
 edition = "2021"
 authors = ["neko233"]
-description = "Offline GeoIP library for Rust — built-in MMDB, hot-reload, zero-config, high-performance"
+description = "Offline GeoIP library for Rust with hot reload and high-performance lookups"
 license = "Apache-2.0"
 repository = "https://github.com/neko233-com/geoip233"
 homepage = "https://github.com/neko233-com/geoip233"
 documentation = "https://docs.rs/geoip233"
 readme = "README.md"
+build = false
+exclude = ["src/builtin/**", "build.rs"]
 keywords = ["geoip", "maxmind", "mmdb", "geolocation", "ip"]
 categories = ["network-programming", "parser-implementations"]
 
 [features]
-default = ["mmap", "builtin"]
+default = ["mmap"]
 mmap = ["dep:memmap2"]
-builtin = []
 hot-reload = ["dep:arc-swap"]
 
 [dependencies]

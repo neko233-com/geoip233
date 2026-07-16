@@ -1,1 +1,1 @@
-*.mmdb filter=lfs diff=lfs merge=lfs -text
+# MMDB is retained as a regular Git file for repository tests only.

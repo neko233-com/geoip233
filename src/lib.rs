@@ -6,8 +6,7 @@
 //!
 //! | Feature | Default | Description |
 //! |---------|---------|-------------|
-//! | `builtin` | ✓ | Embed GeoLite2-City database in binary |
-//! | `mmap` | ✓ | Memory-mapped file I/O for custom databases |
+//! | `mmap` | ✓ | Memory-mapped file I/O for databases |
 //! | `hot-reload` | ✗ | Enable `update()` for runtime database replacement |
 //!
 //! ## Quick Start
@@ -15,9 +14,10 @@
 //! ```no_run
 //! use geoip233::GeoIp;
 //!
-//! let geo = GeoIp::default();
+//! let geo = GeoIp::open("/path/to/GeoLite2-City.mmdb")?;
 //! let city = geo.lookup_str("8.8.8.8").unwrap();
 //! println!("Country: {}", city.country_str());
+//! # Ok::<(), geoip233::GeoIpError>(())
 //! ```
 
 mod error;
@@ -50,7 +50,8 @@ impl GeoIp {
         let path = path.as_ref();
         let reader = Reader::open_readfile(path).map_err(|e| {
             let msg = e.to_string();
-            if msg.contains("No such file") || msg.contains("not found") || msg.contains("os error") {
+            if msg.contains("No such file") || msg.contains("not found") || msg.contains("os error")
+            {
                 GeoIpError::FileNotFound(path.display().to_string())
             } else {
                 GeoIpError::InvalidDatabase(msg)
@@ -139,7 +140,12 @@ impl GeoIp {
         let meta = &reader.metadata;
         Some(GeoIpMetadata {
             database_type: meta.database_type.clone(),
-            description: meta.description.values().next().cloned().map(|s| s.to_owned()),
+            description: meta
+                .description
+                .values()
+                .next()
+                .cloned()
+                .map(|s| s.to_owned()),
             build_epoch: Some(meta.build_epoch),
             node_count: Some(meta.node_count as u64),
         })
@@ -176,31 +182,6 @@ impl GeoIp {
     #[cfg(not(feature = "hot-reload"))]
     fn reader_read(&self) -> Option<std::sync::RwLockReadGuard<'_, Reader<Vec<u8>>>> {
         self.reader.read().ok()
-    }
-}
-
-// ---------------------------------------------------------------------------
-// Default — built-in database
-// ---------------------------------------------------------------------------
-
-impl Default for GeoIp {
-    fn default() -> Self {
-        #[cfg(feature = "builtin")]
-        {
-            const BUILTIN_DB: &[u8] = include_bytes!("builtin/geolite2-city.mmdb");
-            Self::from_bytes(BUILTIN_DB.to_vec())
-                .expect("built-in database is always valid")
-        }
-
-        #[cfg(not(feature = "builtin"))]
-        {
-            panic!(
-                "No database configured. Options:\n\
-                 1. Enable the `builtin` feature (default)\n\
-                 2. Use `GeoIp::open(\"path/to/file.mmdb\")`\n\
-                 3. Use `GeoIp::from_bytes(data)`"
-            )
-        }
     }
 }
 

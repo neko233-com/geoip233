@@ -4,7 +4,7 @@ Offline GeoIP library for Rust, powered by MaxMind DB (.mmdb) format.
 
 ## Features
 
-- **Built-in database** — Ships with GeoLite2-City, zero-config out of the box
+- **Offline database** — Open any MaxMind-compatible MMDB file
 - **Hot-reload** — Update the database at runtime without downtime (opt-in)
 - **High performance** — Lock-free reads via `ArcSwap`, optional mmap support
 - **Thread-safe** — Safe to share `Arc<GeoIp>` across threads
@@ -14,8 +14,7 @@ Offline GeoIP library for Rust, powered by MaxMind DB (.mmdb) format.
 ```rust
 use geoip233::GeoIp;
 
-// Zero-config: built-in database
-let geo = GeoIp::default();
+let geo = GeoIp::open("/path/to/GeoLite2-City.mmdb").unwrap();
 let city = geo.lookup_str("8.8.8.8").unwrap();
 println!("Country: {}", city.country_str());  // "US"
 println!("City: {}", city.city_str());
@@ -47,7 +46,7 @@ geoip233 = { version = "0.1", features = ["hot-reload"] }
 use geoip233::GeoIp;
 use std::sync::Arc;
 
-let geo = Arc::new(GeoIp::default());
+let geo = Arc::new(GeoIp::open("/path/to/GeoLite2-City.mmdb").unwrap());
 
 // Atomic swap — concurrent readers see old or new data, never inconsistent
 geo.update_from_file("/new/database.mmdb").unwrap();
@@ -58,7 +57,6 @@ geo.update_from_bytes(new_data).unwrap();
 
 | Feature | Default | Description |
 |---------|---------|-------------|
-| `builtin` | ✓ | Embed GeoLite2-City database in binary |
 | `mmap` | ✓ | Memory-mapped file I/O |
 | `hot-reload` | ✗ | Enable `update()` for runtime database replacement |
 
@@ -66,7 +64,6 @@ geo.update_from_bytes(new_data).unwrap();
 
 ### Core
 
-- `GeoIp::default()` — Built-in database
 - `GeoIp::open(path)` — Open from file
 - `GeoIp::from_bytes(data)` — Open from bytes
 - `GeoIp::open_mmap(path)` — Open with mmap (feature `mmap`)
@@ -88,7 +85,7 @@ geo.update_from_bytes(new_data).unwrap();
 
 ## Getting Database Files
 
-The built-in database is GeoLite2-City. For updates or custom databases:
+To obtain a GeoLite2-City database:
 
 1. Register at [MaxMind](https://www.maxmind.com/en/geolite2/signup)
 2. Download `GeoLite2-City.mmdb`
