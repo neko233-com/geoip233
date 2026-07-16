@@ -1,0 +1,9 @@
+/target
+Cargo.lock
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Don't ignore the builtin MMDB (needed for include_bytes!)
+!src/builtin/*.mmdb
